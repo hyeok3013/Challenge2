@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_final/add_task.dart';
+import 'package:todo_final/todo_list_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MainScreen extends StatefulWidget {
@@ -103,79 +104,10 @@ class _MainScreenState extends State<MainScreen> {
         title: const Text("TODO App"),
         centerTitle: true,
       ),
-      body: (todoList.isEmpty)
-          ? const Center(
-              child: Text(
-                "No items on the list",
-                style: TextStyle(fontSize: 20),
-              ),
-            )
-          : ListView.builder(
-              itemCount: todoList.length,
-              itemBuilder: (context, index) {
-                return Dismissible(
-                  key: UniqueKey(),
-                  direction: DismissDirection.startToEnd,
-                  background: Container(
-                    color: Colors.red,
-                    child: const Row(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Icon(Icons.check),
-                        )
-                      ],
-                    ),
-                  ),
-                  onDismissed: (direction) {
-                    setState(() {
-                      todoList.removeAt(index);
-                    });
-                    writeLocalData();
-                  },
-                  child: ListTile(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(20),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  todoList.removeAt(index);
-                                });
-                                writeLocalData();
-                                Navigator.pop(context);
-                              },
-                              child: const Text("Task done!"),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    title: Text(todoList[index]),
-                  ),
-                );
-              },
-            ),
+      body: TodoListView(todoList: todoList, writeLocalData: writeLocalData),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            builder: (context) {
-              return Padding(
-                padding: MediaQuery.of(context).viewInsets,
-                child: SizedBox(
-                  height: 250,
-                  child: AddTask(
-                    addTodo: addTodo,
-                  ),
-                ),
-              );
-            },
-          );
+          buildShowModalBottomSheet(context);
         },
         backgroundColor: Colors.black,
         child: const Icon(
@@ -183,6 +115,23 @@ class _MainScreenState extends State<MainScreen> {
           color: Colors.white,
         ),
       ),
+    );
+  }
+
+  Future<dynamic> buildShowModalBottomSheet(BuildContext context) {
+    return showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: MediaQuery.of(context).viewInsets,
+          child: SizedBox(
+            height: 250,
+            child: AddTask(
+              addTodo: addTodo,
+            ),
+          ),
+        );
+      },
     );
   }
 }
